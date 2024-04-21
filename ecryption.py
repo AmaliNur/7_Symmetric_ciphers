@@ -1,43 +1,77 @@
-def encrypt(k, m):
-    return ''.join(map(chr, [x + k for x in map(ord, m)]))
+import random
 
-def decrypt(k, c):
-    return ''.join(map(chr, [x - k for x in map(ord, c)]))
-
-def caesar_encrypt(k, plaintext):
+def encrypt_caesar(k, plaintext):
     ciphertext = ''
     for char in plaintext:
-        if char.isalpha():  # Check if the character is an alphabet
+        if char.isalpha():  # Проверяем, является ли символ буквой
             shifted = ord(char) + k
-            if char.islower():  # Handle lowercase letters
+            if char.islower():  # Обработка для строчных букв
                 if shifted > ord('z'):
                     shifted -= 26
-            elif char.isupper():  # Handle uppercase letters
+            elif char.isupper():  # Обработка для заглавных букв
                 if shifted > ord('Z'):
                     shifted -= 26
             ciphertext += chr(shifted)
         else:
-            ciphertext += char  # Keep non-alphabetic characters unchanged
+            ciphertext += char  # Сохраняем не-буквенные символы без изменений
     return ciphertext
 
-def caesar_decrypt(k, ciphertext):
-    return caesar_encrypt(-k, ciphertext)  # Decrypt by shifting in the opposite direction
+def decrypt_caesar(k, ciphertext):
+    return encrypt_caesar(-k, ciphertext)  # Дешифрование через обратный сдвиг
 
-def caesar_break(ciphertext):
-    for key in range(26):  # Try all possible keys
-        decrypted_text = caesar_decrypt(key, ciphertext)
-        print(f'Key = {key}: {decrypted_text}')
+def encrypt_vernam(key, plaintext):
+    random.seed(key)  # Устанавливаем seed для повторяемости
+    ciphertext = ''
+    for char in plaintext:
+        if char.isalpha():  # Проверяем, является ли символ буквой
+            shift = random.randint(0, 25)  # Генерируем случайное смещение
+            shifted = ord(char) + shift
+            if char.islower():  # Обработка для строчных букв
+                if shifted > ord('z'):
+                    shifted -= 26
+            elif char.isupper():  # Обработка для заглавных букв
+                if shifted > ord('Z'):
+                    shifted -= 26
+            ciphertext += chr(shifted)
+        else:
+            ciphertext += char  # Сохраняем не-буквенные символы без изменений
+    return ciphertext
+
+def decrypt_vernam(key, ciphertext):
+    random.seed(key)  # Устанавливаем seed для повторяемости
+    plaintext = ''
+    for char in ciphertext:
+        if char.isalpha():  # Проверяем, является ли символ буквой
+            shift = random.randint(0, 25)  # Генерируем тот же случайный сдвиг
+            shifted = ord(char) - shift
+            if char.islower():  # Обработка для строчных букв
+                if shifted < ord('a'):
+                    shifted += 26
+            elif char.isupper():  # Обработка для заглавных букв
+                if shifted < ord('A'):
+                    shifted += 26
+            plaintext += chr(shifted)
+        else:
+            plaintext += char  # Сохраняем не-буквенные символы без изменений
+    return plaintext
 
 if __name__ == "__main__":
-    plaintext = 'Hello, World!'
-    key = 3
-    encrypted_text = caesar_encrypt(key, plaintext)
-    decrypted_text = caesar_decrypt(key, encrypted_text)
+    # Шифр Цезаря
+    plaintext_caesar = 'Hello, World!'
+    key_caesar = 3
+    encrypted_text_caesar = encrypt_caesar(key_caesar, plaintext_caesar)
+    decrypted_text_caesar = decrypt_caesar(key_caesar, encrypted_text_caesar)
 
-    print('Original Text:', plaintext)
-    print('Encrypted Text:', encrypted_text)
-    print('Decrypted Text:', decrypted_text)
+    print('Original Text (Caesar):', plaintext_caesar)
+    print('Encrypted Text (Caesar):', encrypted_text_caesar)
+    print('Decrypted Text (Caesar):', decrypted_text_caesar)
 
-    # Test breaking the Caesar cipher without knowing the key
-    encrypted_text_to_break = 'Khoor, Zruog!'
-    caesar_break(encrypted_text_to_break)
+    # Шифр Вернама
+    plaintext_vernam = 'Hello, World!'
+    key_vernam = 'secretkey'
+    encrypted_text_vernam = encrypt_vernam(key_vernam, plaintext_vernam)
+    decrypted_text_vernam = decrypt_vernam(key_vernam, encrypted_text_vernam)
+
+    print('\nOriginal Text (Vernam):', plaintext_vernam)
+    print('Encrypted Text (Vernam):', encrypted_text_vernam)
+    print('Decrypted Text (Vernam):', decrypted_text_vernam)
